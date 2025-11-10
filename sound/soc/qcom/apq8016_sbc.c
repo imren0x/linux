@@ -242,10 +242,10 @@ static int msm8916_qdsp6_startup(struct snd_pcm_substream *substream)
 
 	/* HACK For making external codecs work
 	 *
-	 * For some codecs in the Quinary DAI link we have to explicitly set the
-	 * format to I2S.
+	 * For some codecs in the Quinary/Quaternary DAI link we have to
+	 * explicitly set the format to I2S.
 	 */
-	if (cpu_dai->id == QUINARY_MI2S_RX) {
+	if (cpu_dai->id == QUINARY_MI2S_RX || cpu_dai->id == QUATERNARY_MI2S_RX) {
 		snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_BC_FC | SND_SOC_DAIFMT_I2S);
 	}
 
