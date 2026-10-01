@@ -17,6 +17,23 @@
 	compatible = "xiaomi,vince", "qcom,msm8953";
 	qcom,board-id = <0x1000b 0x08>;
 
+	/*
+	 * Goodix GF3208. Its SPI bus (BLSP2 QUP1, GPIO 16-19) belongs to
+	 * TrustZone, where the fingerprint TA talks to the sensor; the kernel
+	 * only handles reset, the interrupt and the screen state.
+	 */
+	fingerprint {
+		compatible = "goodix,fingerprint";
+
+		reset-gpios = <&tlmm 140 GPIO_ACTIVE_LOW>;
+		irq-gpios = <&tlmm 48 GPIO_ACTIVE_HIGH>;
+
+		panel = <&panel>;
+
+		pinctrl-0 = <&fingerprint_default>;
+		pinctrl-names = "default";
+	};
+
 	gpio-keys {
 		pinctrl-names = "default";
 		pinctrl-0 = <&gpio_hall_sensor_default>;
@@ -263,6 +280,22 @@
 		function = "gpio";
 		bias-disable;
 		drive-strength = <2>;
+	};
+
+	fingerprint_default: fingerprint-default-state {
+		irq-pins {
+			pins = "gpio48";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+		};
+
+		reset-pins {
+			pins = "gpio140";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+		};
 	};
 
 	gpio_hall_sensor_default: gpio-hall-sensor-state {
