@@ -1,5 +1,12 @@
 config FINGERPRINT_GOODIX_GF3208
 	tristate "Goodix GF3208 fingerprint driver support"
-	depends on INPUT_FINGERPRINT
+	depends on GPIOLIB && OF && NET
+	depends on DRM || !DRM
 	help
-	  Say Y here to enable goodix fingerprint driver support!
+	  Say Y here to enable support for the Goodix GF3208 fingerprint
+	  sensor as found on Xiaomi MSM8953 devices. It provides
+	  /dev/goodix_fp and a netlink socket for the vendor fingerprint HAL,
+	  which talks to the sensor through TrustZone.
+
+	  To compile this driver as a module, choose M here: the module will
+	  be called goodix_fp.

@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Fingerprint sensor drivers
+#
+menuconfig INPUT_FINGERPRINT
+	bool "Fingerprint sensors"
+	help
+	  Say Y here to get to see options for fingerprint sensor drivers.
+	  These only provide GPIO, interrupt and key event plumbing for vendor
+	  fingerprint HALs; the sensors themselves are driven by TrustZone.
+
+if INPUT_FINGERPRINT
+
+source "drivers/input/fingerprint/goodix/Kconfig"
+
+endif

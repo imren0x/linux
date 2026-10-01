@@ -6,22 +6,11 @@
 #include <net/sock.h>
 #include <net/netlink.h>
 
-#define NETLINK_TEST 25
+#include "gf_spi.h"
+
 #define MAX_MSGSIZE 32
-int stringlength(char *s);
-void sendnlmsg(char *message);
-int pid;
-int err;
-struct sock *nl_sk = NULL;
-int flag = 0;
-
-
-struct gf_uk_channel{
-	int channel_id;
-	int reserved;
-	char buf[3*1024];
-	int len;
-};
+static int pid;
+static struct sock *nl_sk = NULL;
 
 
 void sendnlmsg(char *message)
@@ -37,9 +26,14 @@ void sendnlmsg(char *message)
 	skb_1 = alloc_skb(len, GFP_KERNEL);
 	if (!skb_1) {
 		printk(KERN_ERR "my_net_link:alloc_skb_1 error\n");
+		return;
 	}
 	slen = strlen(message);
 	nlh = nlmsg_put(skb_1, 0, 0, 0, MAX_MSGSIZE, 0);
+	if (!nlh) {
+		kfree_skb(skb_1);
+		return;
+	}
 
 	NETLINK_CB(skb_1).portid = 0;
 	NETLINK_CB(skb_1).dst_group = 0;
@@ -49,28 +43,33 @@ void sendnlmsg(char *message)
 
 
 	ret = netlink_unicast(nl_sk, skb_1, pid, MSG_DONTWAIT);
-	if (!ret) {
+	if (ret < 0) {
 
 		printk("send msg from kernel to usespace failed ret 0x%x \n", ret);
 	}
 }
 
-void nl_data_ready(struct sk_buff *__skb)
+static void nl_data_ready(struct sk_buff *__skb)
 {
 	struct sk_buff *skb;
 	struct nlmsghdr *nlh;
 	char str[100];
+	size_t len;
+
 	skb = skb_get (__skb);
 	if (skb->len >= NLMSG_SPACE(0)) {
 		nlh = nlmsg_hdr(skb);
 
-		memcpy(str, NLMSG_DATA(nlh), sizeof(str));
+		len = min_t(size_t, sizeof(str) - 1, skb->len - NLMSG_HDRLEN);
+
+		memcpy(str, NLMSG_DATA(nlh), len);
+		str[len] = '\0';
 		pid = nlh->nlmsg_pid;
 
 		if (pid)
 			printk("Message pid %d received:%s\n", pid, str) ;
-		kfree_skb(skb);
 	}
+	kfree_skb(skb);
 
 }
 
@@ -82,7 +81,6 @@ int netlink_init(void)
 	netlink_cfg.groups = 0;
 	netlink_cfg.flags = 0;
 	netlink_cfg.input = nl_data_ready;
-	netlink_cfg.cb_mutex = NULL;
 
 
 	nl_sk = netlink_kernel_create(&init_net, NETLINK_TEST,

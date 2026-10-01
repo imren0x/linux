@@ -2,7 +2,7 @@
 #define __GF_SPI_H
 
 #include <linux/types.h>
-#include <linux/notifier.h>
+#include <drm/drm_panel.h>
 /**********************************************************/
 enum FP_MODE {
 	GF_IMAGE_MODE = 0,
@@ -11,6 +11,15 @@ enum FP_MODE {
 	GF_FF_MODE,
 	GF_DEBUG_MODE = 0x56
 };
+
+/*
+ * Navigation key codes the downstream kernel added to input-event-codes.h,
+ * in a range mainline leaves unused. The vendor keylayout maps these.
+ */
+#define KEY_GESTURE_NAV_UP	195
+#define KEY_GESTURE_NAV_DOWN	196
+#define KEY_GESTURE_NAV_LEFT	197
+#define KEY_GESTURE_NAV_RIGHT	198
 
 #define SUPPORT_NAV_EVENT
 #if defined(SUPPORT_NAV_EVENT)
@@ -97,9 +106,6 @@ struct gf_ioc_chip_info {
 #endif
 
 
-#define  USE_PLATFORM_BUS     1
-
-
 #define GF_NETLINK_ENABLE 1
 #define GF_NET_EVENT_IRQ 1
 #define GF_NET_EVENT_FB_BLACK 2
@@ -107,49 +113,26 @@ struct gf_ioc_chip_info {
 #define NETLINK_TEST 25
 
 
-#ifdef ENABLE_PINCTRL
-static const char * const pctl_names[] = {
-
-	"goodixfp_reset_reset",
-	"goodixfp_reset_active",
-	"goodixfp_irq_active",
-};
-#endif
-
 struct gf_dev {
 	dev_t devt;
 	struct list_head device_entry;
-#if defined(USE_SPI_BUS)
-	struct spi_device *spi;
-#elif defined(USE_PLATFORM_BUS)
 	struct platform_device *spi;
-#endif
-	struct clk *core_clk;
-	struct clk *iface_clk;
-
-#ifdef ENABLE_PINCTRL
-	struct pinctrl *fingerprint_pinctrl;
-	struct pinctrl_state *pinctrl_state[ARRAY_SIZE(pctl_names)];
-#endif
 
 	struct input_dev *input;
 	/* buffer is NULL unless this device is open (users > 0) */
 	unsigned users;
-	signed irq_gpio;
-	signed reset_gpio;
-	signed pwr_gpio;
+	struct gpio_desc *irq_gpio;
+	struct gpio_desc *reset_gpio;
 	int irq;
+	bool irq_requested;
 	int irq_enabled;
-	int clk_enabled;
 #ifdef GF_FASYNC
 	struct fasync_struct *async;
 #endif
-	struct notifier_block notifier;
+	struct drm_panel_follower panel_follower;
+	struct wakeup_source *wakelock;
 	char device_available;
 	char fb_black;
-	char wait_finger_down;
-	struct work_struct work;
-
 };
 
 int gf_parse_dts(struct gf_dev *gf_dev);
