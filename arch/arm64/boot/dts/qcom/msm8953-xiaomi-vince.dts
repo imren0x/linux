@@ -223,6 +223,14 @@
 	qcom,cabc;
 };
 
+&qcom_seecom {
+	status = "okay";
+};
+
+&qseecom_heap {
+	status = "okay";
+};
+
 &rmi4_ts {
 	status = "disabled";
 };

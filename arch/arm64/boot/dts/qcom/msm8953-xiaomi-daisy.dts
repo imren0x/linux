@@ -224,6 +224,14 @@
 	qcom,num-strings = <3>;
 };
 
+&qcom_seecom {
+	status = "okay";
+};
+
+&qseecom_heap {
+	status = "okay";
+};
+
 &sdhc_2 {
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_HIGH>;
 };

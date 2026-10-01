@@ -291,6 +291,14 @@
 	status = "okay";
 };
 
+&qcom_seecom {
+	status = "okay";
+};
+
+&qseecom_heap {
+	status = "okay";
+};
+
 &sound_card {
 	model = "xiaomi-markw";
 

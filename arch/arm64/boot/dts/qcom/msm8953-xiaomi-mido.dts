@@ -251,6 +251,14 @@
 	regulator-min-microvolt = <1200000>;
 };
 
+&qcom_seecom {
+	status = "okay";
+};
+
+&qseecom_heap {
+	status = "okay";
+};
+
 &sdhc_2 {
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
 };

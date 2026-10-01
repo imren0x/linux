@@ -232,6 +232,14 @@
 	status = "okay";
 };
 
+&qcom_seecom {
+	status = "okay";
+};
+
+&qseecom_heap {
+	status = "okay";
+};
+
 &rpm_requests {
 	regulators {
 		compatible = "qcom,rpm-pm8953-regulators";
