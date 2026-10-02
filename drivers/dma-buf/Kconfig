@@ -65,4 +65,18 @@ menuconfig DMABUF_HEAPS
 
 source "drivers/dma-buf/heaps/Kconfig"
 
+config DMABUF_ION_COMPAT
+	tristate "ION compatibility device"
+	depends on DMABUF_HEAPS && OF
+	help
+	  Provides /dev/ion with the ioctl ABI of the removed ION allocator,
+	  both the legacy (pre-4.12) handle based one and the later fd based
+	  one, on top of DMA-BUF heaps. This is for vendor userspace built
+	  against downstream msm kernels, which allocates through ION.
+
+	  The ION heaps are described in the device tree like on downstream
+	  kernels, with a "qcom,msm-ion" node.
+
+	  If unsure, say N.
+
 endmenu
