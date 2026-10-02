@@ -514,6 +514,35 @@
 		reg = <0 0x10000000 0 0>;
 	};
 
+	/*
+	 * ION heaps of the downstream kernel, for vendor userspace using
+	 * /dev/ion (CONFIG_DMABUF_ION_COMPAT). The content protected heap
+	 * (ID 8) is left out, as it cannot be supported.
+	 */
+	ion: ion {
+		compatible = "qcom,msm-ion";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
+
+		heap@19 {
+			reg = <19>;
+			memory-region = <&qseecom_ta_heap>;
+			qcom,ion-heap-type = "DMA";
+		};
+
+		heap@25 {
+			reg = <25>;
+			qcom,ion-heap-type = "SYSTEM";
+		};
+
+		heap@27 {
+			reg = <27>;
+			memory-region = <&qseecom_heap>;
+			qcom,ion-heap-type = "DMA";
+		};
+	};
+
 	memshare: memshare {
 		compatible = "qcom,memshare";
 
@@ -725,6 +754,16 @@
 			compatible = "shared-dma-pool";
 			size = <0x0 0x1000000>;
 			alignment = <0x0 0x400000>;
+			reusable;
+			status = "disabled";
+		};
+
+		/* Backs the ION QSECOM TA heap, as downstream. */
+		qseecom_ta_heap: qseecom-ta {
+			compatible = "shared-dma-pool";
+			size = <0x0 0x400000>;
+			alignment = <0x0 0x400000>;
+			alloc-ranges = <0x0 0x0 0x0 0xffffffff>;
 			reusable;
 			status = "disabled";
 		};
