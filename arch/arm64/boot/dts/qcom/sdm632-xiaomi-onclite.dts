@@ -195,6 +195,10 @@
 	};
 };
 
+&ion {
+	status = "okay";
+};
+
 &lpass {
 	status = "okay";
 };
@@ -237,6 +241,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

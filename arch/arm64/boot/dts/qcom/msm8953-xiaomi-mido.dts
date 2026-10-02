@@ -215,6 +215,10 @@
 	touchscreen-size-y = <1920>;
 };
 
+&ion {
+	status = "okay";
+};
+
 &panel {
 	compatible = "xiaomi,mido-panel";
 };
@@ -256,6 +260,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

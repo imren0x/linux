@@ -218,6 +218,10 @@
 	};
 };
 
+&ion {
+	status = "okay";
+};
+
 &panel {
 	compatible = "xiaomi,vince-panel";
 };
@@ -245,6 +249,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

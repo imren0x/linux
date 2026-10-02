@@ -146,6 +146,10 @@
 	firmware-name = "qcom/msm8953/xiaomi/rosy/a506_zap.mdt";
 };
 
+&ion {
+	status = "okay";
+};
+
 &panel {
 	compatible = "xiaomi,rosy-panel";
 };
@@ -169,6 +173,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

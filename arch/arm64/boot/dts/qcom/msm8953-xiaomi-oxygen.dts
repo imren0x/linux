@@ -115,6 +115,10 @@
 	firmware-name = "qcom/msm8953/xiaomi/oxygen/a506_zap.mdt";
 };
 
+&ion {
+	status = "okay";
+};
+
 &mdss_dsi0 {
 	vdda-supply = <&pm8953_s3>;
 	vddio-supply = <&pm8953_l6>;
@@ -155,6 +159,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

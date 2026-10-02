@@ -274,6 +274,10 @@
 	};
 };
 
+&ion {
+	status = "okay";
+};
+
 &panel {
 	compatible = "xiaomi,markw-panel";
 };
@@ -296,6 +300,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

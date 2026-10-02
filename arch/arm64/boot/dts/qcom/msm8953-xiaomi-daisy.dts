@@ -179,6 +179,10 @@
 	};
 };
 
+&ion {
+	status = "okay";
+};
+
 &max98927_codec {
 	status = "okay";
 
@@ -229,6 +233,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 

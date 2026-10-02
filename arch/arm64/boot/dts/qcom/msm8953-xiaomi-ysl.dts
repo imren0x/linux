@@ -196,6 +196,10 @@
 	compatible = "qcom,wcn3620";
 };
 
+&ion {
+	status = "okay";
+};
+
 &panel {
 	compatible = "xiaomi,ysl-panel";
 };
@@ -218,6 +222,10 @@
 };
 
 &qseecom_heap {
+	status = "okay";
+};
+
+&qseecom_ta_heap {
 	status = "okay";
 };
 
