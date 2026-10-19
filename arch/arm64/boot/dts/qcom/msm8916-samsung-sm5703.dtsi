@@ -1,0 +1,147 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/*
+ * Common definitions for Samsung devices with the SM5703 PMIC (charger,
+ * regulators) and fuel gauge. The GPIOs vary depending on the device.
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	battery: battery {
+		compatible = "simple-battery";
+		voltage-min-design-microvolt = <3400000>;
+		charge-term-current-microamp = <200000>;
+
+		/* Varies depending on the device */
+		voltage-max-design-microvolt = <4350000>;
+		constant-charge-voltage-max-microvolt = <4350000>;
+		constant-charge-current-max-microamp = <1500000>;
+	};
+
+	i2c_fg: i2c-fg {
+		compatible = "i2c-gpio";
+		sda-gpios = <&tlmm 14 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&tlmm 15 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-0 = <&fg_i2c_default>;
+		pinctrl-names = "default";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		fuel_gauge: fuel-gauge@71 {
+			compatible = "siliconmitus,sm5703-fuel-gauge";
+			reg = <0x71>;
+
+			monitored-battery = <&battery>;
+			power-supplies = <&charger>;
+		};
+	};
+
+	i2c_pmic: i2c-pmic {
+		compatible = "i2c-gpio";
+		sda-gpios = <&tlmm 22 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&tlmm 23 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-0 = <&pmic_i2c_default>;
+		pinctrl-names = "default";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		pmic@49 {
+			compatible = "siliconmitus,sm5703";
+			reg = <0x49>;
+
+			interrupt-parent = <&tlmm>;
+			interrupts = <62 IRQ_TYPE_EDGE_FALLING>;
+
+			mrstb-gpios = <&tlmm 24 GPIO_ACTIVE_HIGH>;
+
+			pinctrl-0 = <&pmic_int_default &pmic_mrstb_default>;
+			pinctrl-names = "default";
+
+			regulators {
+				sm5703_usbldo1: usbldo1 {
+					regulator-always-on;
+				};
+
+				sm5703_usbldo2: usbldo2 {
+				};
+
+				sm5703_ldo1: ldo1 {
+					regulator-min-microvolt = <2800000>;
+					regulator-max-microvolt = <2800000>;
+				};
+
+				sm5703_ldo2: ldo2 {
+					regulator-min-microvolt = <1500000>;
+					regulator-max-microvolt = <3300000>;
+				};
+
+				sm5703_ldo3: ldo3 {
+					regulator-min-microvolt = <2800000>;
+					regulator-max-microvolt = <3300000>;
+				};
+
+				sm5703_buck: buck {
+					regulator-min-microvolt = <1200000>;
+					regulator-max-microvolt = <1200000>;
+				};
+
+				sm5703_vbus: vbus {
+				};
+			};
+
+			charger: charger {
+				compatible = "siliconmitus,sm5703-charger";
+				monitored-battery = <&battery>;
+				extcon = <&muic>;
+
+				enable-gpios = <&tlmm 51 GPIO_ACTIVE_LOW>;
+
+				pinctrl-0 = <&chg_en_default>;
+				pinctrl-names = "default";
+			};
+		};
+	};
+};
+
+&tlmm {
+	chg_en_default: chg-en-default-state {
+		pins = "gpio51";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	fg_i2c_default: fg-i2c-default-state {
+		pins = "gpio14", "gpio15";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	pmic_i2c_default: pmic-i2c-default-state {
+		pins = "gpio22", "gpio23";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	pmic_int_default: pmic-int-default-state {
+		pins = "gpio62";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	pmic_mrstb_default: pmic-mrstb-default-state {
+		pins = "gpio24";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+};

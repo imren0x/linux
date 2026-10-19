@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/dts-v1/;
+
+#include "msm8916-samsung-j3xprolte-common.dtsi"
+
+/ {
+	model = "Samsung Galaxy J3 Pro (SM-J3110)";
+	compatible = "samsung,j3xprolte-chnopen", "qcom,msm8916";
+	chassis-type = "handset";
+};
+
+&usb_hs_phy {
+	qcom,init-seq = /bits/ 8 <0x1 0x5f 0x2 0x27>;
+};

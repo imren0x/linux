@@ -1,0 +1,132 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+#include "msm8916-samsung-j3-common.dtsi"
+#include "msm8916-samsung-sm5703.dtsi"
+
+/ {
+	reg_touch_key: regulator-touch-key {
+		compatible = "regulator-fixed";
+		regulator-name = "touch_key";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+
+		gpio = <&tlmm 120 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+
+		pinctrl-0 = <&tkey_en_default>;
+		pinctrl-names = "default";
+	};
+
+	i2c-tkey {
+		compatible = "i2c-gpio";
+		sda-gpios = <&tlmm 31 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&tlmm 32 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-0 = <&tkey_i2c_default>;
+		pinctrl-names = "default";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		touchkey@20 {
+			compatible = "coreriver,tc360-touchkey";
+			reg = <0x20>;
+
+			interrupt-parent = <&tlmm>;
+			interrupts = <98 IRQ_TYPE_EDGE_FALLING>;
+
+			vcc-supply = <&reg_touch_key>;
+			vdd-supply = <&reg_touch_key>;
+			vddio-supply = <&pm8916_l6>;
+
+			linux,keycodes = <KEY_APPSELECT KEY_BACK>;
+
+			pinctrl-0 = <&tkey_default>;
+			pinctrl-names = "default";
+		};
+	};
+};
+
+&battery {
+	constant-charge-voltage-max-microvolt = <4330000>;
+};
+
+&fuel_gauge {
+	siliconmitus,discharge-table = <0x1400 0x1b67 0x1cdd 0x1d6f
+					0x1d8b 0x1de2 0x1e32 0x1e63
+					0x1eab 0x1edf 0x1f06 0x1f54
+					0x1fc5 0x20a0 0x2261 0x2399>;
+	siliconmitus,charge-table = <0x1400 0x1b67 0x1cdd 0x1d6f
+				     0x1d8b 0x1de2 0x1e32 0x1e63
+				     0x1eab 0x1edf 0x1f06 0x1f54
+				     0x1fc5 0x20a0 0x2261 0x2399>;
+	siliconmitus,q-table = <0x0000 0x0035 0x00bf 0x0144
+				0x02d9 0x03e9 0x0602 0x0821
+				0x0a3b 0x0b4b 0x0bd5 0x0c5a
+				0x0def 0x1093 0x14cc 0x14dc>;
+	siliconmitus,rce = <0x0749 0x0580 0x0371>;
+	siliconmitus,rs = <0x01ae 0x047a 0x3800 0x00a4>;
+	siliconmitus,mix = <0x0503 0x0004>;
+	siliconmitus,topoff-soc = <0 5>;
+	siliconmitus,dtcd = <1>;
+	siliconmitus,vit-period = <0x350a>;
+	siliconmitus,volt-cal = <0x809e>;
+	siliconmitus,curr-cal = <0x7185>;
+	siliconmitus,temp-offset-cal = <1>;
+	siliconmitus,charge-offset-cal = <0>;
+	siliconmitus,temp-poff = <3400 100 3380 80>;
+	siliconmitus,ext-temp-cal = <1 10 1 1 1 7 2 2>;
+	siliconmitus,min-charge-current-milliamp = <100>;
+};
+
+&reg_vdd_lcd_3p0 {
+	/* Keep the display powered until the panel driver takes over */
+	regulator-boot-on;
+};
+
+&sound {
+	model = "samsung-j3xpro";
+};
+
+&i2c_muic {
+	sda-gpios = <&tlmm 0 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	scl-gpios = <&tlmm 1 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+};
+
+&i2c_sensors {
+	/* I2C2 */
+	sda-gpios = <&tlmm 6 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	scl-gpios = <&tlmm 7 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+};
+
+&muic_i2c_default {
+	pins = "gpio0", "gpio1";
+};
+
+&sensors_i2c_default {
+	/* I2C2 */
+	pins = "gpio6", "gpio7";
+};
+
+&tlmm {
+	tkey_default: tkey-default-state {
+		pins = "gpio98";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	tkey_en_default: tkey-en-default-state {
+		pins = "gpio120";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	tkey_i2c_default: tkey-i2c-default-state {
+		pins = "gpio31", "gpio32";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+};
