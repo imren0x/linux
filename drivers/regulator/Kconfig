@@ -1524,6 +1524,13 @@ config REGULATOR_SPACEMIT_P1
 	  driver as a module, choose M here.  The module will be called
 	  "spacemit-pmic".
 
+config REGULATOR_SM5703
+	tristate "Silicon Mitus SM5703 regulators"
+	depends on MFD_SM5703
+	help
+	  This driver provides support for the LDOs, buck converter, USB LDOs
+	  and the USB OTG VBUS supply of the Silicon Mitus SM5703 PMIC.
+
 config REGULATOR_STM32_BOOSTER
 	tristate "STMicroelectronics STM32 BOOSTER"
 	depends on ARCH_STM32 || COMPILE_TEST
