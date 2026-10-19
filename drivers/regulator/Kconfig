@@ -510,6 +510,14 @@ config REGULATOR_FP9931
 	  so it is found in E-Book readers.
 	  If HWMON is enabled, it also provides temperature measurement.
 
+config REGULATOR_LM3632
+	tristate "TI LM3632 LCD bias and backlight boost power supply"
+	depends on I2C && GPIOLIB
+	help
+	  This driver powers up the TI LM3632 LCD bias and backlight boost
+	  chip and programs its initial configuration. The brightness is
+	  expected to be controlled by the display panel.
+
 config REGULATOR_LM363X
 	tristate "TI LM363X voltage regulators"
 	depends on MFD_TI_LMU

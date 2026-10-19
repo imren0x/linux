@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/regulator/ti,lm3632.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: TI LM3632 LCD bias and backlight boost power supply
+
+maintainers:
+  - Yumi Yukimura <me.cafebabe@gmail.com>
+
+description:
+  The TI LM3632 provides LCD bias supplies and a backlight boost converter.
+  On some devices the brightness is controlled by the display panel via a PWM
+  signal, so the chip only needs to be powered up and configured.
+
+allOf:
+  - $ref: regulator.yaml#
+
+properties:
+  compatible:
+    const: ti,lm3632
+
+  reg:
+    maxItems: 1
+
+  enable-gpios:
+    maxItems: 1
+    description: GPIO connected to the EN (backlight enable) pin
+
+  enp-gpios:
+    maxItems: 1
+    description: GPIO connected to the ENP (positive LCD bias enable) pin
+
+  enn-gpios:
+    maxItems: 1
+    description: GPIO connected to the ENN (negative LCD bias enable) pin
+
+  ti,init-sequence:
+    $ref: /schemas/types.yaml#/definitions/uint8-array
+    description:
+      Pairs of register address and value that are written after the chip
+      is enabled.
+
+required:
+  - compatible
+  - reg
+  - enable-gpios
+  - enp-gpios
+  - enn-gpios
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        regulator@11 {
+            compatible = "ti,lm3632";
+            reg = <0x11>;
+            enable-gpios = <&tlmm 98 GPIO_ACTIVE_HIGH>;
+            enp-gpios = <&tlmm 97 GPIO_ACTIVE_HIGH>;
+            enn-gpios = <&tlmm 120 GPIO_ACTIVE_HIGH>;
+            ti,init-sequence = /bits/ 8 <0x09 0x41 0x02 0x50 0x03 0x0d>;
+        };
+    };
