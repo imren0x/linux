@@ -184,6 +184,7 @@ properties:
               - samsung,j3xprolte-chnctc
               - samsung,j3xprolte-chnopen
               - samsung,j5
+              - samsung,j5ltechn
               - samsung,j5x
               - samsung,rossa
               - samsung,serranove

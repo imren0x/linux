@@ -1,0 +1,160 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/dts-v1/;
+
+#include "msm8916-samsung-j5-common.dtsi"
+#include "msm8916-samsung-sm5703.dtsi"
+
+/ {
+	model = "Samsung Galaxy J5 (2015) (SM-J5008)";
+	compatible = "samsung,j5ltechn", "qcom,msm8916";
+	chassis-type = "handset";
+
+	i2c-lcd {
+		compatible = "i2c-gpio";
+		sda-gpios = <&tlmm 101 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&tlmm 102 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-0 = <&lcd_i2c_default>;
+		pinctrl-names = "default";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		lcd_power: regulator@11 {
+			compatible = "ti,lm3632";
+			reg = <0x11>;
+
+			enable-gpios = <&tlmm 98 GPIO_ACTIVE_HIGH>;
+			enp-gpios = <&tlmm 97 GPIO_ACTIVE_HIGH>;
+			enn-gpios = <&tlmm 120 GPIO_ACTIVE_HIGH>;
+
+			ti,init-sequence = /bits/ 8 <
+				0x09 0x41
+				0x02 0x50
+				0x03 0x0d
+				0x04 0x05
+				0x0a 0x19
+				0x05 0xcc
+				0x0d 0x1e
+				0x0e 0x1e
+				0x0f 0x1e
+				0x0c 0x1f
+			>;
+
+			pinctrl-0 = <&lcd_power_default>;
+			pinctrl-names = "default";
+
+			regulator-name = "lcd_power";
+			regulator-min-microvolt = <5500000>;
+			regulator-max-microvolt = <5500000>;
+			regulator-boot-on;
+		};
+	};
+};
+
+&accelerometer {
+	vdd-supply = <&pm8916_l5>;
+	vddio-supply = <&pm8916_l5>;
+
+	mount-matrix = "-1", "0", "0",
+		       "0", "-1", "0",
+		       "0", "0", "-1";
+};
+
+&front_flash_led {
+	/* LM3632 flash is not supported yet */
+	status = "disabled";
+};
+
+&fuel_gauge {
+	siliconmitus,discharge-table = <0x1400 0x1b33 0x1c4d 0x1d6c
+					0x1d88 0x1db9 0x1de0 0x1dfa
+					0x1e26 0x1e9e 0x1ecd 0x1f12
+					0x1f60 0x20e9 0x225c 0x2399>;
+	siliconmitus,charge-table = <0x1400 0x1b33 0x1c4d 0x1d6c
+				     0x1d88 0x1db9 0x1de0 0x1dfa
+				     0x1e26 0x1e9e 0x1ecd 0x1f12
+				     0x1f60 0x20e9 0x225c 0x2399>;
+	siliconmitus,q-table = <0x0000 0x002f 0x00b8 0x0171
+				0x02fc 0x0380 0x0403 0x0487
+				0x058f 0x09ad 0x0ab5 0x0bbc
+				0x0c40 0x10e2 0x1497 0x149c>;
+	siliconmitus,rce = <0x0749 0x0580 0x0371>;
+	siliconmitus,rs = <0x01ae 0x047a 0x3800 0x00a4>;
+	siliconmitus,mix = <0x0503 0x0004>;
+	siliconmitus,topoff-soc = <0 5>;
+	siliconmitus,dtcd = <1>;
+	siliconmitus,vit-period = <0x3506>;
+	siliconmitus,volt-cal = <0x8000>;
+	siliconmitus,curr-cal = <0x7500>;
+	siliconmitus,temp-offset-cal = <1>;
+	siliconmitus,charge-offset-cal = <(-1)>;
+	siliconmitus,temp-poff = <3400 100 3320 100>;
+	siliconmitus,ext-temp-cal = <0 10 1 1 1 7 1 2>;
+	siliconmitus,min-charge-current-milliamp = <150>;
+};
+
+&charger {
+	enable-gpios = <&tlmm 108 GPIO_ACTIVE_LOW>;
+};
+
+&chg_en_default {
+	pins = "gpio108";
+};
+
+&gpio_hall_sensor {
+	status = "disabled";
+};
+
+&panel {
+	compatible = "samsung,j5ltechn-panel";
+
+	vdd3-supply = <&reg_vdd_lcd_1p8>;
+	vci-supply = <&pm8916_l17>;
+	vbias-supply = <&lcd_power>;
+};
+
+&reg_vdd_lcd_1p8 {
+	gpio = <&tlmm 16 GPIO_ACTIVE_HIGH>;
+
+	/* Keep the display powered until the panel driver takes over */
+	regulator-boot-on;
+};
+
+&sound {
+	model = "samsung-j5chn";
+};
+
+&touchscreen {
+	vdd-supply = <&sm5703_ldo3>;
+};
+
+&usb_hs_phy {
+	qcom,init-seq = /bits/ 8 <0x1 0x19 0x2 0x0b>;
+};
+
+&lcd_1p8_ldo_en_default {
+	pins = "gpio16";
+};
+
+&sm5703_ldo3 {
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+};
+
+&tlmm {
+	lcd_i2c_default: lcd-i2c-default-state {
+		pins = "gpio101", "gpio102";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	lcd_power_default: lcd-power-default-state {
+		pins = "gpio97", "gpio98", "gpio120";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+};

@@ -83,6 +83,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j3ltetw.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j3xprolte-chnctc.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j3xprolte-chnopen.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j5.dtb
+dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j5ltechn.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j5x.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-rossa.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-on7.dtb
