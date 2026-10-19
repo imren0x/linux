@@ -1,0 +1,118 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/siliconmitus,sm5703.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Silicon Mitus SM5703 Power Management IC
+
+maintainers:
+  - Yumi Yukimura <me.cafebabe@gmail.com>
+
+description:
+  The SM5703 is a multifunction device which includes a battery charger,
+  USB LDOs, LDOs, a buck converter and a flash LED driver. It is interfaced to
+  the host controller using I2C. The fuel gauge is a separate I2C device, see
+  siliconmitus,sm5703-fuel-gauge.yaml.
+
+properties:
+  compatible:
+    const: siliconmitus,sm5703
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  mrstb-gpios:
+    maxItems: 1
+    description:
+      GPIO connected to the MRSTB pin. It is driven high to indicate that the
+      system is alive (and no reset should be performed).
+
+  regulators:
+    $ref: /schemas/regulator/siliconmitus,sm5703-regulator.yaml#
+
+  charger:
+    type: object
+    $ref: /schemas/power/supply/power-supply.yaml#
+    unevaluatedProperties: false
+
+    properties:
+      compatible:
+        const: siliconmitus,sm5703-charger
+
+      monitored-battery:
+        description:
+          Phandle to the monitored battery. The battery node needs to contain
+          constant-charge-current-max-microamp, constant-charge-voltage-max-microvolt
+          and optionally charge-term-current-microamp.
+
+      enable-gpios:
+        maxItems: 1
+        description:
+          GPIO connected to the nCHGEN pin. The GPIO is active-low in hardware.
+
+      extcon:
+        maxItems: 1
+        description:
+          Phandle to the extcon device that reports the connected cable type.
+          It is used to select the input current limit.
+
+      siliconmitus,usb-input-current-microamp:
+        description: Input current limit for standard USB ports
+        default: 500000
+
+      siliconmitus,dcp-input-current-microamp:
+        description: Input current limit for dedicated chargers
+        default: 1000000
+
+    required:
+      - compatible
+      - monitored-battery
+
+required:
+  - compatible
+  - reg
+  - interrupts
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    battery: battery {
+        compatible = "simple-battery";
+        constant-charge-current-max-microamp = <1500000>;
+        constant-charge-voltage-max-microvolt = <4330000>;
+        charge-term-current-microamp = <200000>;
+    };
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        pmic@49 {
+            compatible = "siliconmitus,sm5703";
+            reg = <0x49>;
+            interrupt-parent = <&tlmm>;
+            interrupts = <62 IRQ_TYPE_EDGE_FALLING>;
+            mrstb-gpios = <&tlmm 24 GPIO_ACTIVE_HIGH>;
+
+            regulators {
+                ldo3 {
+                    regulator-min-microvolt = <3000000>;
+                    regulator-max-microvolt = <3000000>;
+                };
+            };
+
+            charger {
+                compatible = "siliconmitus,sm5703-charger";
+                monitored-battery = <&battery>;
+                enable-gpios = <&tlmm 51 GPIO_ACTIVE_LOW>;
+            };
+        };
+    };
