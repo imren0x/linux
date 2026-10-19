@@ -88,6 +88,7 @@ properties:
 
       - items:
           - enum:
+              - samsung,j7ltechn
               - wingtech,wt82918hd
           - const: qcom,msm8929
 
