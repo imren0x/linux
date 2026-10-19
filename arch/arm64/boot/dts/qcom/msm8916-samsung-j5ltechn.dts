@@ -10,6 +10,16 @@
 	compatible = "samsung,j5ltechn", "qcom,msm8916";
 	chassis-type = "handset";
 
+	reg_nfc_vio: regulator-nfc-vio {
+		compatible = "regulator-fixed";
+		regulator-name = "nfc_vio";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&tlmm 90 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
 	i2c-lcd {
 		compatible = "i2c-gpio";
 		sda-gpios = <&tlmm 101 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
@@ -143,7 +153,49 @@
 	regulator-max-microvolt = <3000000>;
 };
 
+&blsp_i2c1 {
+	status = "okay";
+
+	nfc@2b {
+		compatible = "nxp,pn547", "nxp,nxp-nci-i2c";
+		reg = <0x2b>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <21 IRQ_TYPE_EDGE_RISING>;
+
+		enable-gpios = <&tlmm 20 GPIO_ACTIVE_HIGH>;
+		firmware-gpios = <&tlmm 49 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-0 = <&nfc_default>;
+		pinctrl-names = "default";
+	};
+};
+
+&pm8916_rpm_regulators {
+	pm8916_l14: l14 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
+};
+
 &tlmm {
+	nfc_default: nfc-default-state {
+		irq-pins {
+			pins = "gpio21";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+
+		nfc-pins {
+			pins = "gpio49", "gpio20", "gpio90";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+
 	lcd_i2c_default: lcd-i2c-default-state {
 		pins = "gpio101", "gpio102";
 		function = "gpio";

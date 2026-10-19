@@ -4,6 +4,16 @@
 #include "msm8916-samsung-sm5703.dtsi"
 
 / {
+	reg_nfc_pvdd: regulator-nfc-pvdd {
+		compatible = "regulator-fixed";
+		regulator-name = "nfc_pvdd";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&tlmm 50 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+	};
+
 	reg_touch_key: regulator-touch-key {
 		compatible = "regulator-fixed";
 		regulator-name = "touch_key";
@@ -108,7 +118,41 @@
 	pins = "gpio6", "gpio7";
 };
 
+&blsp_i2c1 {
+	status = "okay";
+
+	nfc@2b {
+		compatible = "nxp,pn547", "nxp,nxp-nci-i2c";
+		reg = <0x2b>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <21 IRQ_TYPE_EDGE_RISING>;
+
+		enable-gpios = <&tlmm 20 GPIO_ACTIVE_HIGH>;
+		firmware-gpios = <&tlmm 49 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-0 = <&nfc_default>;
+		pinctrl-names = "default";
+	};
+};
+
 &tlmm {
+	nfc_default: nfc-default-state {
+		irq-pins {
+			pins = "gpio21";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+
+		nfc-pins {
+			pins = "gpio49", "gpio20", "gpio50";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+
 	tkey_default: tkey-default-state {
 		pins = "gpio98";
 		function = "gpio";

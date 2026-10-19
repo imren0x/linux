@@ -20,6 +20,13 @@
 		constant-charge-current-max-microamp = <1500000>;
 	};
 
+	vibrator {
+		compatible = "regulator-haptic";
+		haptic-supply = <&sm5703_ldo2>;
+		min-microvolt = <3300000>;
+		max-microvolt = <3300000>;
+	};
+
 	i2c_fg: i2c-fg {
 		compatible = "i2c-gpio";
 		sda-gpios = <&tlmm 14 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
