@@ -893,6 +893,20 @@ config BATTERY_GOLDFISH
 	  driver. Originated in the Android Studio Emulator (goldfish) it is
 	  going to be used in other emulators.
 
+config CHARGER_SM5703
+	tristate "SM5703 battery charger support"
+	depends on MFD_SM5703
+	help
+	  This adds support for the battery charger in the Silicon Mitus
+	  SM5703 PMIC.
+
+config BATTERY_SM5703_FG
+	tristate "SM5703 fuel gauge support"
+	depends on I2C
+	help
+	  This adds support for the battery fuel gauge of the Silicon Mitus
+	  SM5703 PMIC.
+
 config BATTERY_RT5033
 	tristate "RT5033 fuel gauge support"
 	depends on I2C
