@@ -138,6 +138,7 @@
 &ft5406_ts {
 	status = "okay";
 
+	edt,alternate-i2c-addr = <0x39>;
 	touchscreen-size-x = <720>;
 	touchscreen-size-y = <1440>;
 };
