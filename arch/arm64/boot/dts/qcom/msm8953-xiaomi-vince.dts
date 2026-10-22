@@ -257,6 +257,7 @@
 };
 
 &rmi4_ts {
+	rmi4,alternate-i2c-addr = <0x70>;
 	status = "disabled";
 };
 
