@@ -49,6 +49,10 @@ properties:
     description:
       Delay to wait after powering on the device.
 
+  rmi4,alternate-i2c-addr:
+    description:
+      Alternative I2C addresses, for cases where the touchscreen uses the same type but has a different address.
+
   vdd-supply: true
   vio-supply: true
 
@@ -214,6 +218,7 @@ allOf:
         spi-tx-delay-us: false
     else:
       properties:
+        rmi4,alternate-i2c-addr: false
         syna,reset-delay-ms: false
         syna,startup-delay-ms: false
 
@@ -229,6 +234,7 @@ examples:
         touchscreen@20 {
             compatible = "syna,rmi4-i2c";
             reg = <0x20>;
+            rmi4,alternate-i2c-addr = <0x60>;
             interrupt-parent = <&gpx1>;
             interrupts = <6 IRQ_TYPE_EDGE_FALLING>;
 

@@ -8,6 +8,7 @@
 #include <linux/i2c.h>
 #include <linux/rmi.h>
 #include <linux/of.h>
+#include <linux/property.h>
 #include <linux/delay.h>
 #include <linux/regulator/consumer.h>
 #include "rmi_driver.h"
@@ -35,6 +36,7 @@ struct rmi_i2c_xport {
 	struct rmi_transport_dev xport;
 	struct i2c_client *client;
 
+	u16 alternate_addr;
 	struct mutex page_mutex;
 	int page;
 
@@ -49,6 +51,37 @@ struct rmi_i2c_xport {
 
 #define RMI_PAGE_SELECT_REGISTER 0xff
 #define RMI_I2C_PAGE(addr) (((addr) >> 8) & 0xff)
+
+static int rmi_i2c_transfer(struct rmi_i2c_xport *rmi_i2c,
+			    struct i2c_msg *msgs, int num)
+{
+	struct i2c_client *client = rmi_i2c->client;
+	u16 addr = client->addr;
+	int i;
+	int retval;
+
+	for (i = 0; i < num; i++)
+		msgs[i].addr = addr;
+
+	retval = i2c_transfer(client->adapter, msgs, num);
+	if (retval == num || !rmi_i2c->alternate_addr ||
+	    addr == rmi_i2c->alternate_addr)
+		return retval;
+
+	client->addr = rmi_i2c->alternate_addr;
+	for (i = 0; i < num; i++)
+		msgs[i].addr = client->addr;
+
+	retval = i2c_transfer(client->adapter, msgs, num);
+	if (retval == num) {
+		dev_info(&client->dev, "using alternate I2C address %#x\n",
+			 client->addr);
+	} else {
+		client->addr = addr;
+	}
+
+	return retval;
+}
 
 /*
  * rmi_set_page - Set RMI page
@@ -68,10 +101,15 @@ static int rmi_set_page(struct rmi_i2c_xport *rmi_i2c, u8 page)
 {
 	struct i2c_client *client = rmi_i2c->client;
 	u8 txbuf[2] = {RMI_PAGE_SELECT_REGISTER, page};
+	struct i2c_msg msg = {
+		.flags = 0,
+		.len = sizeof(txbuf),
+		.buf = txbuf,
+	};
 	int retval;
 
-	retval = i2c_master_send(client, txbuf, sizeof(txbuf));
-	if (retval != sizeof(txbuf)) {
+	retval = rmi_i2c_transfer(rmi_i2c, &msg, 1);
+	if (retval != 1) {
 		dev_err(&client->dev,
 			"%s: set page failed: %d.", __func__, retval);
 		return (retval < 0) ? retval : -EIO;
@@ -88,6 +126,9 @@ static int rmi_i2c_write_block(struct rmi_transport_dev *xport, u16 addr,
 		container_of(xport, struct rmi_i2c_xport, xport);
 	struct i2c_client *client = rmi_i2c->client;
 	size_t tx_size = len + 1;
+	struct i2c_msg msg = {
+		.flags = 0,
+	};
 	int retval;
 
 	mutex_lock(&rmi_i2c->page_mutex);
@@ -115,8 +156,10 @@ static int rmi_i2c_write_block(struct rmi_transport_dev *xport, u16 addr,
 			goto exit;
 	}
 
-	retval = i2c_master_send(client, rmi_i2c->tx_buf, tx_size);
-	if (retval == tx_size)
+	msg.len = tx_size;
+	msg.buf = rmi_i2c->tx_buf;
+	retval = rmi_i2c_transfer(rmi_i2c, &msg, 1);
+	if (retval == 1)
 		retval = 0;
 	else if (retval >= 0)
 		retval = -EIO;
@@ -140,12 +183,10 @@ static int rmi_i2c_read_block(struct rmi_transport_dev *xport, u16 addr,
 	int retval;
 	struct i2c_msg msgs[] = {
 		{
-			.addr	= client->addr,
 			.len	= sizeof(addr_offset),
 			.buf	= &addr_offset,
 		},
 		{
-			.addr	= client->addr,
 			.flags	= I2C_M_RD,
 			.len	= len,
 			.buf	= buf,
@@ -160,7 +201,7 @@ static int rmi_i2c_read_block(struct rmi_transport_dev *xport, u16 addr,
 			goto exit;
 	}
 
-	retval = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
+	retval = rmi_i2c_transfer(rmi_i2c, msgs, ARRAY_SIZE(msgs));
 	if (retval == ARRAY_SIZE(msgs))
 		retval = 0; /* success */
 	else if (retval >= 0)
@@ -209,12 +250,35 @@ static int rmi_i2c_probe(struct i2c_client *client)
 	struct rmi_device_platform_data *client_pdata =
 					dev_get_platdata(&client->dev);
 	struct rmi_i2c_xport *rmi_i2c;
+	u32 alternate_addr;
 	int error;
 
 	rmi_i2c = devm_kzalloc(&client->dev, sizeof(struct rmi_i2c_xport),
 				GFP_KERNEL);
 	if (!rmi_i2c)
 		return -ENOMEM;
+
+	if (device_property_present(&client->dev,
+				    "rmi4,alternate-i2c-addr")) {
+		error = device_property_read_u32(&client->dev,
+						 "rmi4,alternate-i2c-addr",
+						 &alternate_addr);
+		if (error) {
+			dev_err(&client->dev,
+				"failed to read alternate I2C address: %d\n",
+				error);
+			return error;
+		}
+
+		if (alternate_addr == client->addr) {
+			dev_err(&client->dev,
+				"invalid alternate I2C address %#x\n",
+				alternate_addr);
+			return -EINVAL;
+		}
+
+		rmi_i2c->alternate_addr = alternate_addr;
+	}
 
 	pdata = &rmi_i2c->xport.pdata;
 
